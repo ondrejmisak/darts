@@ -1,4 +1,4 @@
-let maxScore = 101;
+let maxScore = 301;
 const randomNames = ["Martin", "Peter", "Ondrej", "Michal", "Lukas"];
 let players       = [];
 let activePlayer  = 0;
@@ -130,9 +130,6 @@ function howToEndGame() {
      
 }
 
- 
-
-
 function addScore(hit) {
 
     if (!gameStatus) {
@@ -258,38 +255,38 @@ function nextPlayersMove() {
 }
 
 function bestWayToEndGame1Darts (score) {
-    let dart1 = 0;
-    let dart1Mod = 1;
+    let dartThrow1 = 0;
+    let dartThrow1Multi = 1;
 
     bestString = "none";
     bestSum = 0;
 
-    for (dart1Mod = 3; dart1Mod >= 1; dart1Mod--) {
-        for (dart1 = 20; dart1 >= 0; dart1--) {
+    for (dartThrow1Multi = 3; dartThrow1Multi >= 1; dartThrow1Multi--) {
+        for (dartThrow1 = 20; dartThrow1 >= 0; dartThrow1--) {
 
-            testScore = score - dart1*dart1Mod;
+            testScore = score - dartThrow1*dartThrow1Multi;
 
-            if (dart1 != 0 && dart1Mod != 2 && testScore != 50) {
+            if (dartThrow1 != 0 && dartThrow1Multi != 2 && testScore != 50) {
                 continue;
             }
 
-            if (testScore == 0 || (testScore == 50 && dart1 == 0)){
+            if (testScore == 0 || (testScore == 50 && dartThrow1 == 0)){
 
                 returnString = "";
 
-                if (testScore == 50 && dart1 == 0) {
+                if (testScore == 50 && dartThrow1 == 0) {
                     returnString += "50";
                 }  else {
-                    returnString += multiplierIntoLetter(dart1Mod) + dart1 + " ";
+                    returnString += multiplierIntoLetter(dartThrow1Multi) + dartThrow1 + " ";
                 }
 
-                sum = 3*dart1;
-                if (dart1 == 0 && testScore == 0) {
+                sum = 3*dartThrow1;
+                if (dartThrow1 == 0 && testScore == 0) {
                     sum += 300;
                 } else if (testScore == 0) {
                     sum += 100;
                 }
-                if (dart1Mod == 3){
+                if (dartThrow1Multi == 3){
                     sum += 50;
                 }
                 
@@ -305,50 +302,50 @@ function bestWayToEndGame1Darts (score) {
 
  
 function bestWayToEndGame2Darts (score) {
-    let dart1 = 0;
-    let dart1Mod = 1;
+    let dartThrow1 = 0;
+    let dartThrow1Multi = 1;
 
-    let dart2 = 0;
-    let dart2Mod = 1;
+    let dartThrow2 = 0;
+    let dartThrow2Multi = 1;
 
     bestString = "none";
     bestSum = 0;
 
-    for (dart1Mod = 3; dart1Mod >= 1; dart1Mod--) {
+    for (dartThrow1Multi = 3; dartThrow1Multi >= 1; dartThrow1Multi--) {
 
-        for (dart2Mod = 3; dart2Mod >= 1; dart2Mod--) {
+        for (dartThrow2Multi = 3; dartThrow2Multi >= 1; dartThrow2Multi--) {
 
-            for (dart1 = 20; dart1 >= 1; dart1--) {
+            for (dartThrow1 = 20; dartThrow1 >= 1; dartThrow1--) {
 
-                for (dart2 = 20; dart2 >= 0; dart2--) {
+                for (dartThrow2 = 20; dartThrow2 >= 0; dartThrow2--) {
 
-                    testScore = score - dart1*dart1Mod - dart2*dart2Mod;
+                    testScore = score - dartThrow1*dartThrow1Multi - dartThrow2*dartThrow2Multi;
 
-                    if (dart2 == 0 && dart1 != 0 && dart1Mod != 2 && testScore != 50) {
+                    if (dartThrow2 == 0 && dartThrow1 != 0 && dartThrow1Multi != 2 && testScore != 50) {
                         continue;
                     }
 
-                    if (testScore == 0 || (testScore == 50 && dart2 == 0)){
+                    if (testScore == 0 || (testScore == 50 && dartThrow2 == 0)){
 
                         returnString = "";
 
-                        returnString += multiplierIntoLetter(dart1Mod) + dart1 + " ";
+                        returnString += multiplierIntoLetter(dartThrow1Multi) + dartThrow1 + " ";
 
-                        if (dart2 > 0) {
-                            returnString += multiplierIntoLetter(dart2Mod) + dart2 + " ";
+                        if (dartThrow2 > 0) {
+                            returnString += multiplierIntoLetter(dartThrow2Multi) + dartThrow2 + " ";
                         }
 
-                        if (testScore == 50 && dart2 == 0) {
+                        if (testScore == 50 && dartThrow2 == 0) {
                             returnString += "50";
                         }  
 
-                        sum = dart1+3*dart2;
-                        if (dart2 == 0 && testScore == 0) {
+                        sum = dartThrow1+3*dartThrow2;
+                        if (dartThrow2 == 0 && testScore == 0) {
                             sum += 300;
                         } else if (testScore == 0) {
                             sum += 100;
                         }
-                        if (dart1Mod == 3){
+                        if (dartThrow1Multi == 3){
                             sum += 50;
                         }
                         
@@ -366,55 +363,55 @@ function bestWayToEndGame2Darts (score) {
 
 function bestWayToEndGame(score){
 
-    let dart1 = 0;
-    let dart1Mod = 1;
+    let dartThrow1 = 0;
+    let dartThrow1Multi = 1;
 
-    let dart2 = 0;
-    let dart2Mod = 1;
+    let dartThrow2 = 0;
+    let dartThrow2Multi = 1;
 
-    let dart3 = 0;
-    let dart3Mod = 2;
+    let dartThrow3 = 0;
+    let dartThrow3Multi = 2;
 
     bestString = "none";
     bestSum = 0;
 
-    for (dart1Mod = 3; dart1Mod >= 1; dart1Mod--) {
-        for (dart2Mod = 3; dart2Mod >= 1; dart2Mod--) {
-            for (dart1 = 20; dart1 >= 1; dart1--) {
-                for (dart2 = 20; dart2 >= 0; dart2--) {
-                    for (dart3 = 20; dart3 >= 0; dart3--) {
+    for (dartThrow1Multi = 3; dartThrow1Multi >= 1; dartThrow1Multi--) {
+        for (dartThrow2Multi = 3; dartThrow2Multi >= 1; dartThrow2Multi--) {
+            for (dartThrow1 = 20; dartThrow1 >= 1; dartThrow1--) {
+                for (dartThrow2 = 20; dartThrow2 >= 0; dartThrow2--) {
+                    for (dartThrow3 = 20; dartThrow3 >= 0; dartThrow3--) {
 
-                        testScore = score - dart1*dart1Mod - dart2*dart2Mod - dart3*dart3Mod;
+                        testScore = score - dartThrow1*dartThrow1Multi - dartThrow2*dartThrow2Multi - dartThrow3*dartThrow3Multi;
 
-                        if (dart3 == 0 && dart2 != 0 && dart2Mod != 2 && testScore != 50) {
+                        if (dartThrow3 == 0 && dartThrow2 != 0 && dartThrow2Multi != 2 && testScore != 50) {
                             continue;
-                        } else if (dart2 == 0 && dart1 != 0 && dart1Mod != 2 && testScore != 50) {
+                        } else if (dartThrow2 == 0 && dartThrow1 != 0 && dartThrow1Multi != 2 && testScore != 50) {
                             continue;
                         }
 
-                        if (testScore == 0 || (testScore == 50 && dart3 == 0)){
+                        if (testScore == 0 || (testScore == 50 && dartThrow3 == 0)){
 
                             returnString = "";
 
-                            returnString += multiplierIntoLetter(dart1Mod) + dart1 + " ";
+                            returnString += multiplierIntoLetter(dartThrow1Multi) + dartThrow1 + " ";
 
-                            if (dart2 > 0) {
-                                returnString += multiplierIntoLetter(dart2Mod) + dart2 + " ";
+                            if (dartThrow2 > 0) {
+                                returnString += multiplierIntoLetter(dartThrow2Multi) + dartThrow2 + " ";
                             }
 
-                            if (testScore == 50 && dart3 == 0) {
+                            if (testScore == 50 && dartThrow3 == 0) {
                                 returnString += "50";
-                            } else if (dart3 > 0) {
-                                returnString += multiplierIntoLetter(dart3Mod) + dart3;
+                            } else if (dartThrow3 > 0) {
+                                returnString += multiplierIntoLetter(dartThrow3Multi) + dartThrow3;
                             }
 
-                            sum = dart1+3*dart2+5*dart3;
-                            if (dart2 == 0 && dart3 == 0 && testScore == 0) {
+                            sum = dartThrow1+3*dartThrow2+5*dartThrow3;
+                            if (dartThrow2 == 0 && dartThrow3 == 0 && testScore == 0) {
                                 sum += 300;
-                            } else if (dart3 == 0 && testScore == 0) {
+                            } else if (dartThrow3 == 0 && testScore == 0) {
                                 sum += 100;
                             }
-                            if (dart1Mod == 3){
+                            if (dartThrow1Multi == 3){
                                 sum += 50;
                             }
 
