@@ -258,7 +258,7 @@ function bestWayToEndGame1Darts (score) {
     let dartThrow1 = 0;
     let dartThrow1Multi = 1;
 
-    bestString = "none";
+    bestString = "---";
     bestSum = 0;
 
     for (dartThrow1Multi = 3; dartThrow1Multi >= 1; dartThrow1Multi--) {
@@ -308,7 +308,7 @@ function bestWayToEndGame2Darts (score) {
     let dartThrow2 = 0;
     let dartThrow2Multi = 1;
 
-    bestString = "none";
+    bestString = "---";
     bestSum = 0;
 
     for (dartThrow1Multi = 3; dartThrow1Multi >= 1; dartThrow1Multi--) {
@@ -372,7 +372,7 @@ function bestWayToEndGame(score){
     let dartThrow3 = 0;
     let dartThrow3Multi = 2;
 
-    bestString = "none";
+    bestString = "---";
     bestSum = 0;
 
     for (dartThrow1Multi = 3; dartThrow1Multi >= 1; dartThrow1Multi--) {
