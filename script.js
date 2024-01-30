@@ -1,6 +1,7 @@
 let maxScore = 301;
 const randomNames = ["Martin", "Peter", "Ondrej", "Michal", "Lukas"];
 let players       = [];
+let playersBackup = [];
 let activePlayer  = 0;
 let round         = 1;
 let multiplier    = 1;
@@ -19,6 +20,7 @@ $( document ).ready(function() {
     }); 
 });
 
+/** scene #1 */
 function setMaxScore(score){
     maxScore = score;
     let scoreScreen = $("#setMaxScore");
@@ -31,10 +33,12 @@ $("#btn-set-custom-score").click(function(){
     if($("#custom-score").val() !== '' &&  $("#custom-score").val() >= 1) {
         setMaxScore($("#custom-score").val());
     }else {
-        createToast(false,'Enter Number')
+        createToast(false,'Zadaj číslo')
     }
+    
 })
 
+/** scene #2 */
 function setPlayersName() {
     let playersName = $("#players-name").val();
     if(playersName !== '') {
@@ -47,6 +51,7 @@ function setPlayersName() {
 }
 
 function createPlayer(playersName) {
+    
     playerId = generateRandomString(7);
     var obj = {
 
@@ -60,6 +65,7 @@ function createPlayer(playersName) {
 
     $("#addedPlayersList").append(`<li class="list-group-item">${playersName}</li>`)
     $("#addedPlayersList").removeClass('d-none');
+    $('#startGame').fadeIn('slow');
 }
 
 function createGame() {
@@ -68,20 +74,164 @@ function createGame() {
         createToast(false,'Zadaj hracov')
         return false;
     }  
-     
+    
+    playersBackup = JSON.parse(JSON.stringify(players));
+
     $("#setUsers").fadeOut('slow');
-    $("#game").fadeIn('slow');
+    $("#game").fadeIn(1500);
+
+    
 
     players.forEach(player => {
         $("#players-cards").append(createPlayerCardContainer(player))
     });
+    
+    $("#players-cards").prepend(createControlPanel())
+    
 
     /* set active player */
+    let activePlayer  = 0;
     $("#"+players[activePlayer].id).addClass("text-bg-primary")
-    howToEndGame()
+    howToEndGame();
+     
+}
+
+function restartGame() {
+    players = JSON.parse(JSON.stringify(playersBackup));
+    $("#game").fadeOut().addClass('pe-none');
+    loadingScreen();
+    activePlayer  = 0;
+    round         = 1;
+    multiplier    = 1;
+    dartsLeft     = 3;
+    totalRoundScore = 0;
+    currentScore = 0;
+    orderOfWinners = 1;
+    gameStatus = true;
+    $("#players-cards").empty();
+    createGame();
+    $("#game").removeClass('pe-none');
 }
 
 
+ 
+
+
+function addScore(hit) {
+
+    if (!gameStatus) {
+        return false;
+    }
+
+    if(dartsLeft == 3) {
+        currentScore = players[activePlayer].score;
+    }
+    
+    var roundScore = hit*multiplier;
+    totalRoundScore = (totalRoundScore+roundScore);
+    
+
+    if(dartsLeft == 3) { //new row
+        $("#user-round-score-"+players[activePlayer].id).append(` 
+            <ul class="list-inline user-round-score-row border-bottom">
+                <li class="list-inline-item round-score">${multiplierIntoLetter(multiplier) + hit }</li>
+                <li class="list-inline-item"><b>( <span class="user-round-score-total-${players[activePlayer].id}">${totalRoundScore}</span> )</b></li>
+            </ul>
+        `);
+    }else { //append to existing row
+        $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .list-inline-item:last")
+        .before(`<li class="list-inline-item round-score">${multiplierIntoLetter(multiplier) + hit } </li>`);
+        
+        $(".user-round-score-total-"+players[activePlayer].id+":last").text(totalRoundScore);
+    }
+
+    resetMultiplier();
+    
+
+    if( (players[activePlayer].score - roundScore  ) < 0 ) {
+        /** prehodil */
+        $(".user-round-score-total-"+players[activePlayer].id+":last").addClass('text-danger');
+        $("#score-"+players[activePlayer].id).text(currentScore)
+        players[activePlayer].score = currentScore;    
+        nextPlayersMove();
+        return false;
+
+         
+    }
+
+    $("#score-"+players[activePlayer].id).text(players[activePlayer].score - roundScore)
+    players[activePlayer].score = players[activePlayer].score - roundScore;
+
+    /* 
+        objIndex = players.findIndex((obj => obj.id == playerId));
+        console.log(objIndex)
+        players[objIndex].score = 10;
+        console.log(players);
+    */
+    
+
+    dartsLeft--;
+    
+    if(dartsLeft == 0) {
+
+        if( players[activePlayer].score == 0 ) {
+            /** vyhral */
+            players[activePlayer].status = false;
+            $("#score-"+players[activePlayer].id).text(players[activePlayer].score)
+            $("#score-"+players[activePlayer].id).addClass('text-success');
+
+            showWinningModal();
+            
+            orderOfWinners++;
+           
+            nextPlayersMove();
+            return false;
+        } 
+        
+        nextPlayersMove();
+        return false;
+    }else{
+        howToEndGame()
+    }
+ 
+}
+
+function handleUndo() {
+    var undoMulti = 1;
+    
+    //ak bude hrat sam tak to nepude
+    if(dartsLeft == 3) {
+        //return to prev player
+         // activePlayer--   
+        return false;
+    }   
+    var lastShotText = $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .round-score:last").html();
+    
+    if (lastShotText.includes("T")) {
+        undoMulti = 3;
+    } else if (lastShotText.includes("D")) {
+        undoMulti = 2;
+    } else {
+        undoMulti = 1;
+    }
+
+    var lastShot = lastShotText.replace(/[^\d.-]/g, '');
+
+    var lastShot = parseInt(lastShot);
+
+    $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .round-score:last").remove()
+    $(".user-round-score-total-"+players[activePlayer].id+":last").html('');
+    if(dartsLeft == 2) {
+        $("#user-round-score-"+players[activePlayer].id+ " .user-round-score-row:last").remove()
+    }
+
+    console.log((undoMulti*lastShot))
+    dartsLeft++;
+    totalRoundScore = (totalRoundScore-(undoMulti*lastShot));
+    players[activePlayer].score = players[activePlayer].score + (undoMulti*lastShot);
+    $("#score-"+players[activePlayer].id).text(players[activePlayer].score)
+
+}
 
 function checkIfGameIsOver() {
     var winners = new Set(players.map((item) => item.status));
@@ -95,7 +245,131 @@ function checkIfGameIsOver() {
     }
     
 }
+
+
+function nextPlayersMove() {
+    checkIfGameIsOver();
+     
+    if (!gameStatus) {
+        return false;
+    }
+
+    dartsLeft = 3;
+    totalRoundScore = 0;
+
+    $("#"+players[activePlayer].id).removeClass("text-bg-primary")
+    if(activePlayer >= 0 && activePlayer < players.length - 1){
+        activePlayer = activePlayer + 1;
+        if(players[activePlayer].status === false) {
+            nextPlayersMove();
+        }
+    }else{
+        activePlayer = 0;
+        round++;
+        $("#roundCounter").append(`<ul id="roundCounter" class="list-inline border-bottom">
+                                        <li class="list-inline-item round-score">${round}</li>
+                                    </ul>`);
+        
+        if( players[activePlayer].status == false ){
+            
+            //next round here?
+            nextPlayersMove();
+        }
+
+    }
+    howToEndGame()
+    $("#"+players[activePlayer].id).addClass("text-bg-primary");
+}
+function showWinningModal () {
+    switch (orderOfWinners) {
+        case 1 :
+            $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥇</h${orderOfWinners}>`);
+            $("#"+players[activePlayer].id+" .card-title").html(players[activePlayer].name+ " 🥇").addClass('text-success')
+            break;
+        case 2:
+            $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥈</h${orderOfWinners}>`);
+            $("#"+players[activePlayer].id+" .card-title").html(players[activePlayer].name+ " 🥈").addClass('text-success')
+            break;
+        case 3:
+            $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥉</h${orderOfWinners}>`);
+            $("#"+players[activePlayer].id+" .card-title").html(players[activePlayer].name+ " 🥉").addClass('text-success')
+            break;
+        default:
+            $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥔</h${orderOfWinners}>`);
+            $("#"+players[activePlayer].id+" .card-title").html(players[activePlayer].name+ " 🥔").addClass('text-success')
+            break;
+    }
+    myModal.toggle()
+}
+function createControlPanel() {
+    var controlPanel = $(`
+                    <div id="controlPanel" class="card bg-white text-black">
+                        <div class="card-header border-bottom">
+                            <h5 class="card-title text-center ">#</h5>
+                        </div>
+                        <div class="card-body text-center d-flex flex-column gap-3 overflow-y-auto">
+                            <div id="roundCounter" class="text-center">
+                                <ul class="list-inline border-bottom">
+                                    <li class="list-inline-item round-score">1</li>
+                                </ul>
+                            </div>
+                            <div class="route-to-endgame mt-auto text-center">
+
+                            </div>
+                        </div>
+                        <div class="card-footer text-center p-2 ">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="restartGame()"><i class="bi bi-bootstrap-reboot"></i></button>
+                        </div>
+                    </div>           
+                `);
+    return controlPanel;
+}
+
+function createPlayerCardContainer(player) {
+    var card = $(`
+                <div id="${player.id}" class="card ">
+                <div class="card-header border-bottom">
+                    <h5 class="card-title text-center ">${player.name}</h5>
+                </div>
+                <div class="card-body text-center d-flex flex-column gap-3 overflow-y-auto">
+                    <div id="user-round-score-${player.id}" class="text-end">
+                        
+                    </div>
+                    
+                    <div class="route-to-endgame mt-auto text-center">
+                       
+                    </div>
+                </div>
+                <div class="card-footer text-center p-2 border-top">
+                    <h4 id="score-${player.id}">${player.score}</h4>
+                </div>
+            </div>           
+        `);
+    return card;
+};
+
+function resetMultiplier() {
+    multiplier = 1;
+    $(".multipliersetter").removeClass('bg-success');
+    $(".hide-by-multiplier").removeClass('opacity-0 pe-none');
+}
  
+ 
+$(document).on("click",".multipliersetter",function(e) {
+    e.preventDefault();
+
+    if($(this).hasClass('bg-success')) {
+        multiplier = 1;
+        $(this).removeClass("bg-success");
+        $(".hide-by-multiplier").removeClass('opacity-0 pe-none')
+    }else {
+        multiplier = $(this).data('number');
+        $(".multipliersetter").removeClass('bg-success');
+        $(this).addClass('bg-success');
+        $(".hide-by-multiplier").addClass('opacity-0 pe-none')
+    }
+});
+
 function howToEndGame() {
 
     if(players[activePlayer].score <= 170) {
@@ -128,130 +402,6 @@ function howToEndGame() {
         $("#"+players[activePlayer].id+" .route-to-endgame").html('')
     }
      
-}
-
-function addScore(hit) {
-
-    if (!gameStatus) {
-        return false;
-    }
-
-    if(dartsLeft == 3) {
-        currentScore = players[activePlayer].score;
-    }
-    
-    var roundScore = hit*multiplier;
-    totalRoundScore = (totalRoundScore+roundScore);
-    
-
-    if(dartsLeft == 3) { //new row
-        $("#user-round-score-"+players[activePlayer].id).append(` 
-            <ul class="list-inline user-round-score-row border-bottom">
-                <li class="list-inline-item round-score">${multiplierIntoLetter(multiplier) + hit }</li>
-                <li class="list-inline-item"><b>( <span class="user-round-score-total-${players[activePlayer].id}">${totalRoundScore}</span> )</b></li>
-            </ul>
-        `);
-    }else { //append to existing row
-        $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .list-inline-item:last")
-        .before(`
-            <li class="list-inline-item round-score">${multiplierIntoLetter(multiplier) + hit } </li>
-        `);
-        
-        $(".user-round-score-total-"+players[activePlayer].id+":last").text(totalRoundScore);
-    }
-    resetMultiplier();
-    
-
-    if( (players[activePlayer].score - roundScore  ) <= 0 ) {
-        if( players[activePlayer].score - roundScore   == 0 ) {
-            /** vyhral */
-            players[activePlayer].status = false;
-            $("#score-"+players[activePlayer].id).text(players[activePlayer].score - roundScore)
-            $("#score-"+players[activePlayer].id).addClass('text-success');
-            players[activePlayer].score = players[activePlayer].score - roundScore;
-             
-
-            switch (orderOfWinners) {
-                case 1 :
-                    $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥇</h${orderOfWinners}>`);
-                    $("#"+players[activePlayer].id+" .card-title").html(players[activePlayer].name+ " 🥇").addClass('text-success')
-                    break;
-                case 2:
-                    $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥈</h${orderOfWinners}>`);
-                    $("#"+players[activePlayer].id+" .card-title").html(players[activePlayer].name+ " 🥈").addClass('text-success')
-                    break;
-                case 3:
-                    $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥉</h${orderOfWinners}>`);
-                    $("#"+players[activePlayer].id+" .card-title").html(players[activePlayer].name+ " 🥉").addClass('text-success')
-                    break;
-                default:
-                    $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥔</h${orderOfWinners}>`);
-                    $("#"+players[activePlayer].id+" .card-title").addClass('text-success')
-                    break;
-            }
-            
-            orderOfWinners++;
-            myModal.toggle()
-            nextPlayersMove();
-            return false;
-        } else {
-            /** prehodil */
-            $(".user-round-score-total-"+players[activePlayer].id+":last").addClass('text-danger');
-            $("#score-"+players[activePlayer].id).text(currentScore)
-            players[activePlayer].score = currentScore;    
-            nextPlayersMove();
-            return false;
-        }
-    }
-
-    $("#score-"+players[activePlayer].id).text(players[activePlayer].score - roundScore)
-    players[activePlayer].score = players[activePlayer].score - roundScore;
-
-    /* 
-        objIndex = players.findIndex((obj => obj.id == playerId));
-        console.log(objIndex)
-        players[objIndex].score = 10;
-        console.log(players);
-    */
-    
-
-    dartsLeft--;
-    
-    if(dartsLeft == 0) {
-        nextPlayersMove();
-        return false;
-    }else{
-        howToEndGame()
-    }
-}
-
-function nextPlayersMove() {
-    checkIfGameIsOver();
-     
-    if (!gameStatus) {
-        return false;
-    }
-
-    dartsLeft = 3;
-    totalRoundScore = 0;
-
-    $("#"+players[activePlayer].id).removeClass("text-bg-primary")
-    if(activePlayer >= 0 && activePlayer < players.length - 1){
-        activePlayer = activePlayer + 1;
-        if(players[activePlayer].status === false) {
-            nextPlayersMove();
-        }
-    }else{
-
-        activePlayer = 0;
-        if( players[activePlayer].status == false ){
-            
-            
-            nextPlayersMove();
-        }
-    }
-    howToEndGame()
-    $("#"+players[activePlayer].id).addClass("text-bg-primary");
 }
 
 function bestWayToEndGame1Darts (score) {
@@ -432,69 +582,6 @@ function bestWayToEndGame(score){
 }
 
 
-function resetMultiplier() {
-    multiplier = 1;
-    $(".multipliersetter").removeClass('bg-success');
-    $(".hide-by-multiplier").removeClass('opacity-0 pe-none');
-}
- 
- 
-$(document).on("click",".multipliersetter",function(e) {
-    e.preventDefault();
-
-    if($(this).hasClass('bg-success')) {
-        multiplier = 1;
-        $(this).removeClass("bg-success");
-        $(".hide-by-multiplier").removeClass('opacity-0 pe-none')
-    }else {
-        multiplier = $(this).data('number');
-        $(".multipliersetter").removeClass('bg-success');
-        $(this).addClass('bg-success');
-        $(".hide-by-multiplier").addClass('opacity-0 pe-none')
-    }
-});
-
-function createPlayerCardContainer(player) {
-    var card = $(`
-                <div id="${player.id}" class="card ">
-                <div class="card-header border-bottom">
-                    <h5 class="card-title text-center ">${player.name}</h5>
-                </div>
-                <div class="card-body text-center d-flex flex-column gap-3 overflow-y-auto">
-                    <div id="user-round-score-${player.id}" class="text-end">
-                        
-                    </div>
-                    
-                    <div class="route-to-endgame mt-auto text-center">
-                       
-                    </div>
-                </div>
-                <div class="card-footer text-center p-2 border-top">
-                    <h4 id="score-${player.id}">${player.score}</h4>
-                </div>
-            </div>           
-        `);
-    return card;
-};
-
-function multiplierIntoLetter(multiplier){
-    switch (multiplier) {
-        case 1:
-            return "";
-            break;
-        case 2:
-            return "D";
-            break;
-        case 3:
-            return "T";
-            break;
-        default:
-            return "";
-            break;
-    }
-}
-
-
 const myModal = new bootstrap.Modal('#exampleModal', {
     keyboard: true
 })
@@ -516,7 +603,24 @@ function generateRandomString(string_length) {
       i++;
     }
     return string;
-  };
+ };
+
+  function multiplierIntoLetter(multiplier){
+    switch (multiplier) {
+        case 1:
+            return "";
+            break;
+        case 2:
+            return "D";
+            break;
+        case 3:
+            return "T";
+            break;
+        default:
+            return "";
+            break;
+    }
+}
 
 function createToast(isSuccess, toastMessage) {
     var toastContainer = createToastContainer(isSuccess, toastMessage);
@@ -552,3 +656,21 @@ function destroyToast(toastContainer) {
         });
     }, 5000);
 }
+ 
+   
+function loadingScreen() {
+    var loadingScreen = $(`<div style="display:none" class="vh-100 text-center d-flex justify-content-center align-items-center">
+                            <div class="spinner-grow text-primary" role="status">
+                                <span class="sr-only"></span>
+                            </div>
+                        </div>`);
+    $('body').prepend(loadingScreen).fadeIn();
+    setTimeout(function() {
+        loadingScreen.fadeOut(500, function() {
+            loadingScreen.remove();
+        });
+    }, 1000);
+}
+ 
+
+
