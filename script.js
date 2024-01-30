@@ -198,7 +198,7 @@ function addScore(hit) {
 
 function handleUndo() {
     var undoMulti = 1;
-    
+
     //ak bude hrat sam tak to nepude
     if(dartsLeft == 3) {
         //return to prev player
@@ -318,7 +318,10 @@ function createControlPanel() {
                             </div>
                         </div>
                         <div class="card-footer text-center p-2 ">
-                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="restartGame()"><i class="bi bi-bootstrap-reboot"></i></button>
+                            <button type="button" class="btn btn-outline-warning " onclick="handleUndo()"><i class="bi bi-skip-start-circle"></i></button>
+                        </div>
+                        <div class="card-footer text-center p-2 ">
+                            <button type="button" class="btn btn-outline-danger " onclick="restartGame()"><i class="bi bi-bootstrap-reboot"></i></button>
                         </div>
                     </div>           
                 `);
