@@ -15,12 +15,14 @@
     <link rel="stylesheet" href="styles.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js" integrity="sha512-57oZ/vW8ANMjR/KQ6Be9v/+/h6bq9/l3f0Oc7vn6qMqyhvPd1cvKBRWWpzu0QoneImqr2SkmO4MSqU+RpHom3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   </head>
   <body class="overflow-hidden">
   <!-- <body class="overflow-hidden"> -->
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div class="container">
+        
+
         <!--
             var maxScore
             arr users
@@ -34,7 +36,11 @@
         <h1 id="loader" class="text-center vh-100 d-flex justify-content-center align-items-center " style="display: none;">🎯</h1>
 
         <div id="setMaxScore" style="display: none;">
-            <div class="text-center vh-100 d-flex justify-content-center align-items-center ">
+           
+            <div class="text-center vh-100 d-flex justify-content-center align-items-center flex-column">
+                <div>
+                    <img src="assets/hot-shots.png" alt="" class="img-fluid" style="width: 340px;">
+                </div>
                 <div class="d-flex justify-content-center flex-column gap-3 " >
                     <h1>Skóre</h1>
                     <button  class="btn btn-primary" onclick="setMaxScore(51)">51</button>
@@ -145,5 +151,16 @@
 
     <script src="script.js"></script> 
 
-
+<svg>
+  <filter id='noiseFilter'>
+    <feTurbulence 
+      type='fractalNoise' 
+      baseFrequency='0.6' 
+      stitchTiles='stitch'/>
+     <feColorMatrix in="colorNoise" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0" />
+        <feComposite operator="in" in2="SourceGraphic" result="monoNoise"/>
+        <feBlend in="SourceGraphic" in2="monoNoise" mode="screen" />
+  </filter>
+  
+</svg>
 </html>
