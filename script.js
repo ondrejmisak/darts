@@ -59,7 +59,7 @@ function createPlayer(playersName) {
         "id": playerId,
         "name": playersName,
         "score": maxScore,
-        "darts":maxDarts,
+        "darts": dartsLeft,
         "status": true,
 
     }
