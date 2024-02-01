@@ -347,7 +347,7 @@ function createPlayerCardContainer(player) {
                     <h4 id="score-${player.id}">${player.score}</h4>
                 </div>
             </div>           
-        `).show( 'slide', 'slow' );
+        `).show( 'slide');
     return card;
 };
 
