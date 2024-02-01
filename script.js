@@ -330,7 +330,7 @@ function createControlPanel() {
 
 function createPlayerCardContainer(player) {
     var card = $(`
-                <div id="${player.id}" class="card ">
+                <div id="${player.id}" class="card " style="display:none;">
                 <div class="card-header border-bottom">
                     <h5 class="card-title text-center ">${player.name}</h5>
                 </div>
@@ -347,7 +347,7 @@ function createPlayerCardContainer(player) {
                     <h4 id="score-${player.id}">${player.score}</h4>
                 </div>
             </div>           
-        `);
+        `).show( 'slide', 'slow' );
     return card;
 };
 
