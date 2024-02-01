@@ -1,5 +1,5 @@
 let maxScore = 301;
-const randomNames = ["Martin", "Peter", "Ondrej", "Michal", "Lukas"];
+const randomNames = ["Martin", "Peter", "Ondrej", "Michal", "Lukas", "Jozko", "Andrej", "Matus", "Dominika"];
 let players       = [];
 let playersBackup = [];
 let activePlayer  = 0;
@@ -10,6 +10,7 @@ let totalRoundScore = 0;
 var currentScore = 0;
 var orderOfWinners = 1;
 let gameStatus = true;
+
 
 
 $( document ).ready(function() {
@@ -58,6 +59,7 @@ function createPlayer(playersName) {
         "id": playerId,
         "name": playersName,
         "score": maxScore,
+        "darts":maxDarts,
         "status": true,
 
     }
@@ -68,7 +70,40 @@ function createPlayer(playersName) {
     $('#startGame').fadeIn('slow');
 }
 
+
 function createGame() {
+
+players = 
+    [
+        {
+            "id": "B2uFPuOB",
+            "name": "Martin",
+            "score": 51,
+            "darts":3,
+            "status": true
+        },
+        {
+            "id": "3jX7S0uU",
+            "name": "Andrej",
+            "score": 51,
+            "darts":3,
+            "status": true
+        },
+        {
+            "id": "uaYx8vk3",
+            "name": "Lukas",
+            "score": 51,
+            "darts":3,
+            "status": true
+        },{
+            "id": "B2uFPuOX",
+            "name": "Martin",
+            "score": 51,
+            "darts":3,
+            "status": true
+        },
+         
+    ];
         
     if(players.length==0){
         createToast(false,'Zadaj hracov')
@@ -77,13 +112,23 @@ function createGame() {
     
     playersBackup = JSON.parse(JSON.stringify(players));
 
+    $("#loader").remove();
+    $("#setMaxScore").remove()
     $("#setUsers").fadeOut('slow');
     $("#game").fadeIn(1500);
 
     
-
+    var timer = 1;
     players.forEach(player => {
-        $("#players-cards").append(createPlayerCardContainer(player))
+        var playerCard = createPlayerCardContainer(player);
+         
+        $("#players-cards").append(playerCard)
+        timer=timer+150;
+        
+        setTimeout( function(){
+            playerCard.show('drop',timer,'easeInOutQuint'); 
+        }, (timer+timer+timer+timer));
+        
     });
     
     $("#players-cards").prepend(createControlPanel())
@@ -92,9 +137,11 @@ function createGame() {
     /* set active player */
     let activePlayer  = 0;
     $("#"+players[activePlayer].id).addClass("text-bg-primary")
+    //console.log(players)
     howToEndGame();
-     
 }
+
+createGame()
 
 function restartGame() {
     players = JSON.parse(JSON.stringify(playersBackup));
@@ -103,7 +150,7 @@ function restartGame() {
     activePlayer  = 0;
     round         = 1;
     multiplier    = 1;
-    dartsLeft     = 3;
+    //dartsLeft     = 3;
     totalRoundScore = 0;
     currentScore = 0;
     orderOfWinners = 1;
@@ -123,15 +170,14 @@ function addScore(hit) {
         return false;
     }
 
-    if(dartsLeft == 3) {
+    if(players[activePlayer].darts == 3) {
         currentScore = players[activePlayer].score;
     }
     
     var roundScore = hit*multiplier;
     totalRoundScore = (totalRoundScore+roundScore);
-    
 
-    if(dartsLeft == 3) { //new row
+    if(players[activePlayer].darts == 3) { //new row
         $("#user-round-score-"+players[activePlayer].id).append(` 
             <ul class="list-inline user-round-score-row border-bottom">
                 <li class="list-inline-item round-score">${multiplierIntoLetter(multiplier) + hit }</li>
@@ -152,11 +198,22 @@ function addScore(hit) {
         /** prehodil */
         $(".user-round-score-total-"+players[activePlayer].id+":last").addClass('text-danger');
         $("#score-"+players[activePlayer].id).text(currentScore)
-        players[activePlayer].score = currentScore;    
+        players[activePlayer].score = currentScore;   
+        
+        if(players[activePlayer].darts == 3) {
+            $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .list-inline-item:last")
+            .before(`<li class="list-inline-item round-score">0</li>`);
+            $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .list-inline-item:last")
+            .before(`<li class="list-inline-item round-score">0</li>`);
+           
+        }
+        if(players[activePlayer].darts == 2) {
+            $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .list-inline-item:last")
+            .before(`<li class="list-inline-item round-score">0</li>`);
+           
+        }
         nextPlayersMove();
         return false;
-
-         
     }
 
     $("#score-"+players[activePlayer].id).text(players[activePlayer].score - roundScore)
@@ -168,11 +225,9 @@ function addScore(hit) {
         players[objIndex].score = 10;
         console.log(players);
     */
+    players[activePlayer].darts--;
     
-
-    dartsLeft--;
-    
-    if(dartsLeft == 0) {
+    if(players[activePlayer].darts == 0) {
 
         if( players[activePlayer].score == 0 ) {
             /** vyhral */
@@ -200,10 +255,10 @@ function handleUndo() {
     var undoMulti = 1;
 
     //ak bude hrat sam tak to nepude
-    if(dartsLeft == 3) {
-        //return to prev player
-         // activePlayer--   
-        return false;
+    if(players[activePlayer].darts == 3) {
+        prevPlayersMove()
+        console.log('nexe?')
+        players[activePlayer].darts = 0;
     }   
     var lastShotText = $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .round-score:last").html();
     
@@ -217,20 +272,44 @@ function handleUndo() {
 
     var lastShot = lastShotText.replace(/[^\d.-]/g, '');
 
-    var lastShot = parseInt(lastShot);
+    lastShot = parseInt(lastShot);
+
+    totalRoundScore = $(".user-round-score-total-"+players[activePlayer].id+":last").html();
+    console.log(totalRoundScore)
+    if(!totalRoundScore){
+        totalRoundScore = 0;
+    } 
+    totalRoundScore = parseInt(totalRoundScore);
+    
+
+    /** todo
+      
+     * fix counters
+     */
+
+    console.log((undoMulti*lastShot))
+
+    totalRoundScore = (totalRoundScore-(undoMulti*lastShot));
+    if(totalRoundScore < 0) {
+        totalRoundScore = 0;
+    }
+    players[activePlayer].score = players[activePlayer].score + (undoMulti*lastShot);
+
+
+
+    $("#score-"+players[activePlayer].id).text(players[activePlayer].score)
+    $(".user-round-score-total-"+players[activePlayer].id+":last").text(totalRoundScore)
 
     $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .round-score:last").remove()
-    $(".user-round-score-total-"+players[activePlayer].id+":last").html('');
-    if(dartsLeft == 2) {
+    $(".user-round-score-total-"+players[activePlayer].id+":last").html('').removeClass('text-danger');
+    if(players[activePlayer].darts == 2) {
         $("#user-round-score-"+players[activePlayer].id+ " .user-round-score-row:last").remove()
     }
 
-    console.log((undoMulti*lastShot))
-    dartsLeft++;
-    totalRoundScore = (totalRoundScore-(undoMulti*lastShot));
-    players[activePlayer].score = players[activePlayer].score + (undoMulti*lastShot);
-    $("#score-"+players[activePlayer].id).text(players[activePlayer].score)
-
+    players[activePlayer].darts++;
+    if(players[activePlayer].darts > 3) {
+        players[activePlayer].darts = 3;
+    }
 }
 
 function checkIfGameIsOver() {
@@ -246,15 +325,44 @@ function checkIfGameIsOver() {
     
 }
 
+function prevPlayersMove() {
+    $("#"+players[activePlayer].id).removeClass("text-bg-primary")
+    activePlayer--;
+    
+    console.log(activePlayer)
+    if(activePlayer < 0 && activePlayer < players.length + 1){
+        activePlayer = players.length - 1;
+         
+        console.log(activePlayer)
+        
+        if(players[activePlayer].status === false) {
+            prevPlayersMove();
+        }
+       
+    }else{
+        activePlayer = activePlayer--;
+         
+        console.log(activePlayer)
+        
+        if( players[activePlayer].status == false ){
+            prevPlayersMove();
+        }
+    }
+    lastShotText = 0;
+    totalRoundScore = 0;
+    $("#"+players[activePlayer].id).addClass("text-bg-primary")
+}
+
 
 function nextPlayersMove() {
+
     checkIfGameIsOver();
      
     if (!gameStatus) {
         return false;
     }
 
-    dartsLeft = 3;
+    players[activePlayer].darts = 3; //prev player
     totalRoundScore = 0;
 
     $("#"+players[activePlayer].id).removeClass("text-bg-primary")
@@ -277,14 +385,19 @@ function nextPlayersMove() {
         }
 
     }
+
     howToEndGame()
     $("#"+players[activePlayer].id).addClass("text-bg-primary");
+
 }
+
+
 function showWinningModal () {
     switch (orderOfWinners) {
         case 1 :
             $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥇</h${orderOfWinners}>`);
             $("#"+players[activePlayer].id+" .card-title").html(players[activePlayer].name+ " 🥇").addClass('text-success')
+            poof();
             break;
         case 2:
             $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥈</h${orderOfWinners}>`);
@@ -299,7 +412,12 @@ function showWinningModal () {
             $("#"+players[activePlayer].id+" .card-title").html(players[activePlayer].name+ " 🥔").addClass('text-success')
             break;
     }
-    myModal.toggle()
+
+    myModal.toggle();
+    const myModalEl = document.getElementById('exampleModal')
+        myModalEl.addEventListener('hidden.bs.modal', event => {
+        poofOff()
+    })
 }
 function createControlPanel() {
     var controlPanel = $(`
@@ -317,11 +435,14 @@ function createControlPanel() {
 
                             </div>
                         </div>
-                        <div class="card-footer text-center p-2 ">
-                            <button type="button" class="btn btn-outline-warning " onclick="handleUndo()"><i class="bi bi-skip-start-circle"></i></button>
+                        <div class="card-footer text-center p-2 d-none">
+                            <button type="button" class="btn btn-outline-muted " onclick="prevPlayersMove()" title="Predchadzajuci hrac" ><i class="bi bi-arrow-left-circle"></i></button>
                         </div>
                         <div class="card-footer text-center p-2 ">
-                            <button type="button" class="btn btn-outline-danger " onclick="restartGame()"><i class="bi bi-bootstrap-reboot"></i></button>
+                            <button type="button" class="btn btn-outline-muted " onclick="handleUndo()" title="Vymazat skore"><i class="bi bi-skip-start-circle"></i></button>
+                        </div>
+                        <div class="card-footer text-center p-2 ">
+                            <button type="button" class="btn btn-outline-muted " onclick="restartGame()" title="Reset hry"><i class="bi bi-bootstrap-reboot"></i></button>
                         </div>
                     </div>           
                 `);
@@ -330,7 +451,7 @@ function createControlPanel() {
 
 function createPlayerCardContainer(player) {
     var card = $(`
-                <div id="${player.id}" class="card">
+                <div id="${player.id}" class="card " style="display:none">
                 <div class="card-header border-bottom">
                     <h5 class="card-title text-center ">${player.name}</h5>
                 </div>
@@ -376,27 +497,27 @@ $(document).on("click",".multipliersetter",function(e) {
 function howToEndGame() {
 
     if(players[activePlayer].score <= 170) {
-        console.log(dartsLeft)
-        switch(dartsLeft) {
+        //console.log(dartsLeft)
+        switch(players[activePlayer].darts) {
             case 3:
-                console.log('3 sipky')
+                //console.log('3 sipky')
                 $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h4 class="badge bg-secondary">${bestWayToEndGame(players[activePlayer].score)}</h4>`)
-                console.log(bestWayToEndGame(players[activePlayer].score))
+                //console.log(bestWayToEndGame(players[activePlayer].score))
                 break;
             case 2:
-                console.log('2 sipky')
+                //console.log('2 sipky')
                 $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h4 class="badge bg-secondary">${bestWayToEndGame2Darts(players[activePlayer].score)}</h4>`)
-                console.log(bestWayToEndGame2Darts(players[activePlayer].score))
+                //console.log(bestWayToEndGame2Darts(players[activePlayer].score))
                 break;
             case 1:
-                console.log('1 sipka')
+                //console.log('1 sipka')
                 $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h4 class="badge bg-secondary">${bestWayToEndGame1Darts(players[activePlayer].score)}</h4>`)
-                console.log(bestWayToEndGame1Darts(players[activePlayer].score))
+                //console.log(bestWayToEndGame1Darts(players[activePlayer].score))
                 break;
             default:
-                console.log('default sipka')
+                //console.log('default sipka')
                 $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h4 class="badge bg-secondary">${bestWayToEndGame(players[activePlayer].score)}</h4>`)
-                console.log(bestWayToEndGame(players[activePlayer].score))
+                //console.log(bestWayToEndGame(players[activePlayer].score))
 
                 break;
         }
@@ -674,6 +795,224 @@ function loadingScreen() {
         });
     }, 1000);
 }
- 
 
+
+
+ 
+  // Globals
+  var random = Math.random
+    , cos = Math.cos
+    , sin = Math.sin
+    , PI = Math.PI
+    , PI2 = PI * 2
+    , timerC = 10
+    , frame = undefined
+    , confetti = [];
+
+  var particles = 10
+    , spread = 40
+    , sizeMin = 3
+    , sizeMax = 12 - sizeMin
+    , eccentricity = 10
+    , deviation = 100
+    , dxThetaMin = -.1
+    , dxThetaMax = -dxThetaMin - dxThetaMin
+    , dyMin = .13
+    , dyMax = .18
+    , dThetaMin = .4
+    , dThetaMax = .7 - dThetaMin;
+
+  var colorThemes = [
+    function() {
+      return color(200 * random()|0, 200 * random()|0, 200 * random()|0);
+    }, function() {
+      var black = 200 * random()|0; return color(200, black, black);
+    }, function() {
+      var black = 200 * random()|0; return color(black, 200, black);
+    }, function() {
+      var black = 200 * random()|0; return color(black, black, 200);
+    }, function() {
+      return color(200, 100, 200 * random()|0);
+    }, function() {
+      return color(200 * random()|0, 200, 200);
+    }, function() {
+      var black = 256 * random()|0; return color(black, black, black);
+    }, function() {
+      return colorThemes[random() < .5 ? 1 : 2]();
+    }, function() {
+      return colorThemes[random() < .5 ? 3 : 5]();
+    }, function() {
+      return colorThemes[random() < .5 ? 2 : 4]();
+    }
+  ];
+  function color(r, g, b) {
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  // Cosine interpolation
+  function interpolation(a, b, t) {
+    return (1-cos(PI*t))/2 * (b-a) + a;
+  }
+
+  // Create a 1D Maximal Poisson Disc over [0, 1]
+  var radius = 1/eccentricity, radius2 = radius+radius;
+  function createPoisson() {
+    // domain is the set of points which are still available to pick from
+    // D = union{ [d_i, d_i+1] | i is even }
+    var domain = [radius, 1-radius], measure = 1-radius2, spline = [0, 1];
+    while (measure) {
+      var dart = measure * random(), i, l, interval, a, b, c, d;
+
+      // Find where dart lies
+      for (i = 0, l = domain.length, measure = 0; i < l; i += 2) {
+        a = domain[i], b = domain[i+1], interval = b-a;
+        if (dart < measure+interval) {
+          spline.push(dart += a-measure);
+          break;
+        }
+        measure += interval;
+      }
+      c = dart-radius, d = dart+radius;
+
+      // Update the domain
+      for (i = domain.length-1; i > 0; i -= 2) {
+        l = i-1, a = domain[l], b = domain[i];
+        // c---d          c---d  Do nothing
+        //   c-----d  c-----d    Move interior
+        //   c--------------d    Delete interval
+        //         c--d          Split interval
+        //       a------b
+        if (a >= c && a < d)
+          if (b > d) domain[l] = d; // Move interior (Left case)
+          else domain.splice(l, 2); // Delete interval
+        else if (a < c && b > c)
+          if (b <= d) domain[i] = c; // Move interior (Right case)
+          else domain.splice(i, 0, c, d); // Split interval
+      }
+
+      // Re-measure the domain
+      for (i = 0, l = domain.length, measure = 0; i < l; i += 2)
+        measure += domain[i+1]-domain[i];
+    }
+
+    return spline.sort();
+  }
+
+  // Create the overarching container
+  var container = document.createElement('div');
+  container.classList.add('confetti');
+  container.style.position = 'fixed';
+  container.style.top      = '0';
+  container.style.left     = '0';
+  container.style.width    = '100%';
+  container.style.height   = '0';
+  container.style.overflow = 'visible';
+  container.style.zIndex   = '9999';
+
+  // Confetto constructor
+  function Confetto(theme) {
+    this.frame = 0;
+    this.outer = document.createElement('div');
+    this.inner = document.createElement('div');
+    this.outer.appendChild(this.inner);
+
+    var outerStyle = this.outer.style, innerStyle = this.inner.style;
+    outerStyle.position = 'absolute';
+    outerStyle.width  = (sizeMin + sizeMax * random()) + 'px';
+    outerStyle.height = (sizeMin + sizeMax * random()) + 'px';
+    innerStyle.width  = '100%';
+    innerStyle.height = '100%';
+    innerStyle.backgroundColor = theme();
+
+    outerStyle.perspective = '50px';
+    outerStyle.transform = 'rotate(' + (360 * random()) + 'deg)';
+    this.axis = 'rotate3D(' +
+      cos(360 * random()) + ',' +
+      cos(360 * random()) + ',0,';
+    this.theta = 360 * random();
+    this.dTheta = dThetaMin + dThetaMax * random();
+    innerStyle.transform = this.axis + this.theta + 'deg)';
+
+    this.x = window.innerWidth * random();
+    this.y = -deviation;
+    this.dx = sin(dxThetaMin + dxThetaMax * random());
+    this.dy = dyMin + dyMax * random();
+    outerStyle.left = this.x + 'px';
+    outerStyle.top  = this.y + 'px';
+
+    // Create the periodic spline
+    this.splineX = createPoisson();
+    this.splineY = [];
+    for (var i = 1, l = this.splineX.length-1; i < l; ++i)
+      this.splineY[i] = deviation * random();
+    this.splineY[0] = this.splineY[l] = deviation * random();
+
+    this.update = function(height, delta) {
+      this.frame += delta;
+      this.x += this.dx * delta;
+      this.y += this.dy * delta;
+      this.theta += this.dTheta * delta;
+
+      // Compute spline and convert to polar
+      var phi = this.frame % 7777 / 7777, i = 0, j = 1;
+      while (phi >= this.splineX[j]) i = j++;
+      var rho = interpolation(
+        this.splineY[i],
+        this.splineY[j],
+        (phi-this.splineX[i]) / (this.splineX[j]-this.splineX[i])
+      );
+      phi *= PI2;
+
+      outerStyle.left = this.x + rho * cos(phi) + 'px';
+      outerStyle.top  = this.y + rho * sin(phi) + 'px';
+      innerStyle.transform = this.axis + this.theta + 'deg)';
+      return this.y > height+deviation;
+    };
+  }
+
+  function poof() {
+    if (!frame) {
+      // Append the container
+      document.body.appendChild(container);
+
+      // Add confetti
+      var theme = colorThemes[0]
+        , count = 0;
+      (function addConfetto() {
+        var confetto = new Confetto(theme);
+        confetti.push(confetto);
+        container.appendChild(confetto.outer);
+        timerC = setTimeout(addConfetto, spread * random());
+      })(0);
+
+      // Start the loop
+      var prev = undefined;
+      requestAnimationFrame(function loop(timestamp) {
+        var delta = prev ? timestamp - prev : 0;
+        prev = timestamp;
+        var height = window.innerHeight;
+
+        for (var i = confetti.length-1; i >= 0; --i) {
+          if (confetti[i].update(height, delta)) {
+            container.removeChild(confetti[i].outer);
+            confetti.splice(i, 1);
+          }
+        }
+        
+        console.log(confetti.length )
+        if (confetti.length < 250)
+          return frame = requestAnimationFrame(loop);
+
+        // Cleanup
+        document.body.removeChild(container);
+        frame = undefined;
+      });
+    }
+  }
+  function poofOff() {
+    document.body.removeChild(container);
+    frame = undefined;
+  }
+
+ 
 
