@@ -347,7 +347,7 @@ function createPlayerCardContainer(player) {
                     <h4 id="score-${player.id}">${player.score}</h4>
                 </div>
             </div>           
-        `).effect( "bounce", 1000 );
+        `);
     return card;
 };
 
