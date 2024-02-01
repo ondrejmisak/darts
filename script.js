@@ -73,7 +73,7 @@ function createPlayer(playersName) {
 
 function createGame() {
 
-players = 
+playersTest = 
     [
         {
             "id": "B2uFPuOB",
@@ -112,8 +112,8 @@ players =
     
     playersBackup = JSON.parse(JSON.stringify(players));
 
-    $("#loader").remove();
-    $("#setMaxScore").remove()
+    //$("#loader").remove();
+    //$("#setMaxScore").remove()
     $("#setUsers").fadeOut('slow');
     $("#game").fadeIn(1500);
 
@@ -141,7 +141,7 @@ players =
     howToEndGame();
 }
 
-createGame()
+ 
 
 function restartGame() {
     players = JSON.parse(JSON.stringify(playersBackup));
