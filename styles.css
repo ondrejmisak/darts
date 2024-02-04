@@ -1,17 +1,19 @@
 
 /* Arrange buttons */
 .btn-matrix {
-    flex-wrap: wrap; /* allow buttons to jump to another row */
+    flex-wrap: wrap;
  }
+
  .btn-matrix > .btn {
-    width: 25%; /* force buttons to have the same width regardless of content */
- }
+    width: 25%; 
+   }
  .btn-matrix {
     padding: 10px;;
  }
  .btn-score {
-    border-radius: 0.5rem !important;
- }
+   border-radius: 0.5rem !important;
+}
+
 
  .container::before,
  .container::after {
