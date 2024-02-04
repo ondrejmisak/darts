@@ -22,7 +22,8 @@ $( document ).ready(function() {
 });
 
 /** scene #1 */
-function setMaxScore(score = maxScore){
+function setMaxScore(score){
+    maxScore = score;
     let scoreScreen = $("#setMaxScore");
     scoreScreen.fadeOut().removeClass('d-flex');
     let usersScreen = $("#setUsers");
@@ -119,7 +120,7 @@ playersTest =
     playersBackup = JSON.parse(JSON.stringify(players));
     /*  test*/
     //$("#loader").remove();
-   // $("#setMaxScore").remove()
+    //$("#setMaxScore").remove()
     /* /test*/
     $("#setUsers").fadeOut('slow');
     $("#game").fadeIn(1500);
@@ -144,8 +145,6 @@ playersTest =
     $("#"+players[activePlayer].id).addClass("text-bg-primary");
     howToEndGame();
 }
-
- 
 
 function setFirstPlayerActive() {
     $("#"+players[activePlayer].id).removeClass("text-bg-primary");
@@ -175,25 +174,28 @@ function restartGame() {
 }
 
 
- 
-
-
-function addScore(hit) {
-
+function addScore(element, hit) {
+   
+    if( $(element).hasClass("resume-to-game") ) {
+        players[activePlayer].darts = 3
+        $('button.btn-add-score').removeClass('resume-to-game')
+    }
+    
     if (!gameStatus) {
         return false;
     }
-
-    if(players[activePlayer].darts == 3) {
-        currentScore = players[activePlayer].score;
-    }
-    var roundScore = hit*multiplier;
 
     var totalRoundScore1 = $(".user-round-score-total-"+players[activePlayer].id+":last").html();
     
     if(!totalRoundScore1){
         players[activePlayer].darts = 3
     } 
+
+    if(players[activePlayer].darts == 3) {
+        currentScore = players[activePlayer].score;
+    }
+    
+    var roundScore = hit*multiplier;
     
     totalRoundScore = (totalRoundScore+roundScore);
 
@@ -216,6 +218,7 @@ function addScore(hit) {
 
     if( (players[activePlayer].score - roundScore  ) < 0 ) {
         /** prehodil */
+        
         $(".user-round-score-total-"+players[activePlayer].id+":last").addClass('text-danger');
         $("#score-"+players[activePlayer].id).text(currentScore)
         players[activePlayer].score = currentScore;   
@@ -272,6 +275,8 @@ function addScore(hit) {
 }
 
 function handleUndo() {
+
+
     var undoMulti = 1;
     //ak bude hrat sam tak to nepude
     if(players[activePlayer].darts == 3) {
@@ -289,6 +294,8 @@ function handleUndo() {
         prevPlayersMove()
         totalRoundScore = 0;
         players[activePlayer].darts = 0;
+        /**  add class to all buttons*/
+        $('button.btn-add-score').addClass('resume-to-game');
         return false;
     }
     
@@ -299,6 +306,9 @@ function handleUndo() {
     lastShot = parseInt(lastShot);
 
     totalRoundScore = $(".user-round-score-total-"+players[activePlayer].id+":last").html();
+    if(!totalRoundScore){
+        totalRoundScore = 0;
+    } 
     totalRoundScore = (totalRoundScore-(undoMulti*lastShot)); 
     totalRoundScore = parseInt(totalRoundScore);
 
@@ -314,10 +324,7 @@ function handleUndo() {
     }else{
         players[activePlayer].score = players[activePlayer].score + (undoMulti*lastShot);
     }
-    
-    if(!totalRoundScore){
-        totalRoundScore = 0;
-    } 
+    /* tu to bolo, ale co tu bolo? */  
      
 
     $("#score-"+players[activePlayer].id).text(players[activePlayer].score)
@@ -332,7 +339,6 @@ function handleUndo() {
     if(players[activePlayer].darts <= 2) {
         players[activePlayer].darts++;
     }
-    
 }
 
 function getValuesFromLastRow() {
@@ -370,14 +376,14 @@ function prevPlayersMove() {
         activePlayer = players.length - 1;
         
         if(players[activePlayer].status === false) {
-            //prevPlayersMove();
+            prevPlayersMove();
         }
        
     }else{
         activePlayer = activePlayer--;
         
         if( players[activePlayer].status == false ){
-            //prevPlayersMove();
+            prevPlayersMove();
         }
     }
     players[activePlayer].status = true;
