@@ -41,8 +41,8 @@
                     <button  class="btn btn-primary" onclick="setMaxScore(701)">701</button>
                     <button  class="btn btn-primary" onclick="setMaxScore(1001)">1001</button>
                     <div class="input-group mb-3">
-                        <input type="number" min="1" class="form-control" id="custom-score" placeholder="Vlastné" aria-label="vlastne max score" aria-describedby="button-addon2">
-                        <button class="btn btn-primary" type="button" id="btn-set-custom-score">Ok</button>
+                        <input type="number" min="1" class="form-control" id="custom-score btn-add-score" placeholder="Vlastné" aria-label="vlastne max score btn-add-score" aria-describedby="button-addon2">
+                        <button class="btn btn-primary" type="button" id="btn-set-custom-score btn-add-score">Ok</button>
                     </div>
                 </div>      
             </div>
@@ -84,29 +84,29 @@
                             <button type="button" class="btn btn-light btn-lg btn-score multipliersetter" data-number="2" >Double</button>
                             <button type="button" class="btn btn-light btn-lg btn-score multipliersetter" data-number="3" >Triple</button>
                         </div>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score hide-by-multiplier" onclick="addScore(0)">0</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(1)">1</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(2)">2</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(3)">3</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(4)">4</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(5)">5</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(6)">6</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(7)">7</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(8)">8</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(9)">9</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(10)">10</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(11)">11</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(12)">12</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(13)">13</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(14)">14</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(15)">15</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(16)">16</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(17)">17</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(18)">18</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(19)">19</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score" onclick="addScore(20)">20</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score hide-by-multiplier" onclick="addScore(25)">25</button>
-                        <button type="button" class="btn btn-secondary btn-lg btn-score hide-by-multiplier" onclick="addScore(50)">50</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score btn-add-score hide-by-multiplier" onclick="addScore(this,0)">0</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score resume-to-game" value="1" onclick="addScore(this,1)">1</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="2" onclick="addScore(this,2)">2</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="3" onclick="addScore(this,3)">3</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="4" onclick="addScore(this,4)">4</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="5" onclick="addScore(this,5)">5</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="6" onclick="addScore(this,6)">6</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="7" onclick="addScore(this,7)">7</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="8" onclick="addScore(this,8)">8</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="9" onclick="addScore(this,9)">9</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="10" onclick="addScore(this,10)">10</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="11" onclick="addScore(this,11)">11</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="12" onclick="addScore(this,12)">12</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="13" onclick="addScore(this,13)">13</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="14" onclick="addScore(this,14)">14</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="15" onclick="addScore(this,15)">15</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="16" onclick="addScore(this,16)">16</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="17" onclick="addScore(this,17)">17</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="18" onclick="addScore(this,18)">18</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="19" onclick="addScore(this,19)">19</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score" value="20" onclick="addScore(this,20)">20</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score hide-by-multiplier" value="25" onclick="addScore(this,25)">25</button>
+                        <button type="button" class="btn btn-secondary btn-lg btn-score btn-add-score hide-by-multiplier" value="50" onclick="addScore(this,50)">50</button>
                     </div>
                 </div>
             </div>
