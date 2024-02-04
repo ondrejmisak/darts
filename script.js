@@ -280,7 +280,7 @@ function handleUndo() {
         //lastShotText = 0;
         totalRoundScore = 0;
         players[activePlayer].darts = 0;
-        return false;
+        //return false;
     } 
 
     var lastShotText = $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .round-score:last").html();
@@ -289,7 +289,7 @@ function handleUndo() {
         prevPlayersMove()
         totalRoundScore = 0;
         players[activePlayer].darts = 0;
-        
+        return false;
     }
     
     undoMulti = multiplierIntoNumber(lastShotText);
