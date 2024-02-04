@@ -1,4 +1,4 @@
-let maxScore = 301;
+let maxScore = 51;
 const randomNames = ["Martin", "Peter", "Ondrej", "Michal", "Lukas", "Jozko", "Andrej", "Matus", "Dominika"];
 let players       = [];
 let playersBackup = [];
@@ -22,8 +22,7 @@ $( document ).ready(function() {
 });
 
 /** scene #1 */
-function setMaxScore(score){
-    maxScore = score;
+function setMaxScore(score = maxScore){
     let scoreScreen = $("#setMaxScore");
     scoreScreen.fadeOut().removeClass('d-flex');
     let usersScreen = $("#setUsers");
@@ -95,14 +94,21 @@ playersTest =
             "score": 51,
             "darts":3,
             "status": true
-        },{
+        }
+        ,{
             "id": "B2uFPuOX",
-            "name": "Martin",
+            "name": "Martin 2",
+            "score": 51,
+            "darts":3,
+            "status": true
+        } 
+        ,{
+            "id": "C2uFPuOX",
+            "name": "Emil",
             "score": 51,
             "darts":3,
             "status": true
         },
-         
     ];
         
     if(players.length==0){
@@ -111,14 +117,19 @@ playersTest =
     }  
     
     playersBackup = JSON.parse(JSON.stringify(players));
-
+    /*  test*/
     //$("#loader").remove();
-    //$("#setMaxScore").remove()
+   // $("#setMaxScore").remove()
+    /* /test*/
     $("#setUsers").fadeOut('slow');
     $("#game").fadeIn(1500);
-
     
-    var timer = 1;
+    var controlPanel = createControlPanel();
+    $("#players-cards").prepend(controlPanel);
+    controlPanel.show('drop',timer,'easeInOutQuint')
+    var timer = 50;
+    let activePlayer  = 0;
+
     players.forEach(player => {
         var playerCard = createPlayerCardContainer(player);
          
@@ -126,25 +137,28 @@ playersTest =
         timer=timer+150;
         
         setTimeout( function(){
-            playerCard.show('drop',timer,'easeInOutQuint'); 
-        }, (timer+timer+timer+timer));
-        
+            playerCard.show('drop',timer,'easeInOutQuint');
+        }, (timer*4));
     });
-    
-    $("#players-cards").prepend(createControlPanel())
-    
-
-    /* set active player */
-    let activePlayer  = 0;
-    $("#"+players[activePlayer].id).addClass("text-bg-primary")
-    //console.log(players)
+   
+    $("#"+players[activePlayer].id).addClass("text-bg-primary");
     howToEndGame();
 }
 
  
 
+function setFirstPlayerActive() {
+    $("#"+players[activePlayer].id).removeClass("text-bg-primary");
+    activePlayer  = 0;
+    players[activePlayer].darts = 3;
+    players[activePlayer].status = true;
+    $("#"+players[activePlayer].id).addClass("text-bg-primary");
+}
+ 
+
 function restartGame() {
     players = JSON.parse(JSON.stringify(playersBackup));
+
     $("#game").fadeOut().addClass('pe-none');
     loadingScreen();
     activePlayer  = 0;
@@ -173,8 +187,14 @@ function addScore(hit) {
     if(players[activePlayer].darts == 3) {
         currentScore = players[activePlayer].score;
     }
-    
     var roundScore = hit*multiplier;
+
+    var totalRoundScore1 = $(".user-round-score-total-"+players[activePlayer].id+":last").html();
+    
+    if(!totalRoundScore1){
+        players[activePlayer].darts = 3
+    } 
+    
     totalRoundScore = (totalRoundScore+roundScore);
 
     if(players[activePlayer].darts == 3) { //new row
@@ -226,7 +246,7 @@ function addScore(hit) {
         console.log(players);
     */
     players[activePlayer].darts--;
-    
+
     if(players[activePlayer].darts == 0) {
 
         if( players[activePlayer].score == 0 ) {
@@ -253,64 +273,80 @@ function addScore(hit) {
 
 function handleUndo() {
     var undoMulti = 1;
-
     //ak bude hrat sam tak to nepude
     if(players[activePlayer].darts == 3) {
+        // setFirstPlayerActive();
         prevPlayersMove()
-        console.log('nexe?')
+        //lastShotText = 0;
+        totalRoundScore = 0;
         players[activePlayer].darts = 0;
-    }   
-    var lastShotText = $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .round-score:last").html();
-    
-    if (lastShotText.includes("T")) {
-        undoMulti = 3;
-    } else if (lastShotText.includes("D")) {
-        undoMulti = 2;
-    } else {
-        undoMulti = 1;
-    }
+        return false;
+    } 
 
+    var lastShotText = $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .round-score:last").html();
+
+    if(!lastShotText) {
+        prevPlayersMove()
+        totalRoundScore = 0;
+        players[activePlayer].darts = 0;
+        
+    }
+    
+    undoMulti = multiplierIntoNumber(lastShotText);
+     
     var lastShot = lastShotText.replace(/[^\d.-]/g, '');
 
     lastShot = parseInt(lastShot);
 
     totalRoundScore = $(".user-round-score-total-"+players[activePlayer].id+":last").html();
-    console.log(totalRoundScore)
+    totalRoundScore = (totalRoundScore-(undoMulti*lastShot)); 
+    totalRoundScore = parseInt(totalRoundScore);
+
+    $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .round-score:last").remove()
+
+    // prehodil
+    if ($(".user-round-score-total-"+players[activePlayer].id+":last").hasClass( "text-danger" )) {
+        
+        if(totalRoundScore <= players[activePlayer].score) {
+            $(".user-round-score-total-"+players[activePlayer].id+":last").removeClass('text-danger');
+            players[activePlayer].score = players[activePlayer].score - (getValuesFromLastRow());
+        }  
+    }else{
+        players[activePlayer].score = players[activePlayer].score + (undoMulti*lastShot);
+    }
+    
     if(!totalRoundScore){
         totalRoundScore = 0;
     } 
-    totalRoundScore = parseInt(totalRoundScore);
-    
-
-    /** todo
-      
-     * fix counters
-     */
-
-    console.log((undoMulti*lastShot))
-
-    totalRoundScore = (totalRoundScore-(undoMulti*lastShot));
-    if(totalRoundScore < 0) {
-        totalRoundScore = 0;
-    }
-    players[activePlayer].score = players[activePlayer].score + (undoMulti*lastShot);
-
-
+     
 
     $("#score-"+players[activePlayer].id).text(players[activePlayer].score)
     $(".user-round-score-total-"+players[activePlayer].id+":last").text(totalRoundScore)
 
-    $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row .round-score:last").remove()
-    $(".user-round-score-total-"+players[activePlayer].id+":last").html('').removeClass('text-danger');
+
     if(players[activePlayer].darts == 2) {
         $("#user-round-score-"+players[activePlayer].id+ " .user-round-score-row:last").remove()
     }
 
-    players[activePlayer].darts++;
-    if(players[activePlayer].darts > 3) {
-        players[activePlayer].darts = 3;
+    
+    if(players[activePlayer].darts <= 2) {
+        players[activePlayer].darts++;
     }
+    
 }
+
+function getValuesFromLastRow() {
+    let rowScore = 0;
+    let row = $("#user-round-score-"+players[activePlayer].id+" .user-round-score-row:last li.round-score");
+     
+    row.each(function () {
+        columnScore = multiplierIntoNumber($(this).text())*$(this).text().replace(/[^\d.-]/g, '')
+        rowScore = rowScore+columnScore
+    });
+    return rowScore;
+}
+
+
 
 function checkIfGameIsOver() {
     var winners = new Set(players.map((item) => item.status));
@@ -326,30 +362,26 @@ function checkIfGameIsOver() {
 }
 
 function prevPlayersMove() {
+    
     $("#"+players[activePlayer].id).removeClass("text-bg-primary")
     activePlayer--;
-    
-    console.log(activePlayer)
+   
     if(activePlayer < 0 && activePlayer < players.length + 1){
         activePlayer = players.length - 1;
-         
-        console.log(activePlayer)
         
         if(players[activePlayer].status === false) {
-            prevPlayersMove();
+            //prevPlayersMove();
         }
        
     }else{
         activePlayer = activePlayer--;
-         
-        console.log(activePlayer)
         
         if( players[activePlayer].status == false ){
-            prevPlayersMove();
+            //prevPlayersMove();
         }
     }
-    lastShotText = 0;
-    totalRoundScore = 0;
+    players[activePlayer].status = true;
+    
     $("#"+players[activePlayer].id).addClass("text-bg-primary")
 }
 
@@ -368,6 +400,7 @@ function nextPlayersMove() {
     $("#"+players[activePlayer].id).removeClass("text-bg-primary")
     if(activePlayer >= 0 && activePlayer < players.length - 1){
         activePlayer = activePlayer + 1;
+
         if(players[activePlayer].status === false) {
             nextPlayersMove();
         }
@@ -379,8 +412,7 @@ function nextPlayersMove() {
                                     </ul>`);
         
         if( players[activePlayer].status == false ){
-            
-            //next round here?
+            //next round here? yes indeed
             nextPlayersMove();
         }
 
@@ -397,7 +429,6 @@ function showWinningModal () {
         case 1 :
             $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥇</h${orderOfWinners}>`);
             $("#"+players[activePlayer].id+" .card-title").html(players[activePlayer].name+ " 🥇").addClass('text-success')
-            poof();
             break;
         case 2:
             $('.modal-body').html(`<h${orderOfWinners}>${orderOfWinners}. ${players[activePlayer].name} 🥈</h${orderOfWinners}>`);
@@ -414,14 +445,15 @@ function showWinningModal () {
     }
 
     myModal.toggle();
-    const myModalEl = document.getElementById('exampleModal')
+    //todo
+    /*const myModalEl = document.getElementById('exampleModal')
         myModalEl.addEventListener('hidden.bs.modal', event => {
         poofOff()
-    })
+    })*/
 }
 function createControlPanel() {
     var controlPanel = $(`
-                    <div id="controlPanel" class="card bg-white text-black">
+                    <div id="controlPanel" class="card bg-white text-black" style="display:none">
                         <div class="card-header border-bottom">
                             <h5 class="card-title text-center ">#</h5>
                         </div>
@@ -431,15 +463,19 @@ function createControlPanel() {
                                     <li class="list-inline-item round-score">1</li>
                                 </ul>
                             </div>
-                            <div class="route-to-endgame mt-auto text-center">
+                            <div class=" mt-auto text-center">
 
                             </div>
+                        </div>
+                        
+                        <div class="card-footer text-center p-2 ">
+                            <button type="button" class="btn btn-outline-muted " onclick="toggleFullScreen()" title="Full screen" ><i class="bi bi-arrows-fullscreen"></i></button>
                         </div>
                         <div class="card-footer text-center p-2 d-none">
                             <button type="button" class="btn btn-outline-muted " onclick="prevPlayersMove()" title="Predchadzajuci hrac" ><i class="bi bi-arrow-left-circle"></i></button>
                         </div>
                         <div class="card-footer text-center p-2 ">
-                            <button type="button" class="btn btn-outline-muted " onclick="handleUndo()" title="Vymazat skore"><i class="bi bi-skip-start-circle"></i></button>
+                            <button type="button" class="btn btn-outline-muted " onclick="handleUndo()" id="handleUndo" title="Vymazat skore"><i class="bi bi-skip-start-circle"></i></button>
                         </div>
                         <div class="card-footer text-center p-2 ">
                             <button type="button" class="btn btn-outline-muted " onclick="restartGame()" title="Reset hry"><i class="bi bi-bootstrap-reboot"></i></button>
@@ -460,9 +496,9 @@ function createPlayerCardContainer(player) {
                         
                     </div>
                     
-                    <div class="route-to-endgame mt-auto text-center">
-                       
-                    </div>
+                    <span class="route-to-endgame mt-auto text-center badge bg-dark">
+                    
+                    </span>
                 </div>
                 <div class="card-footer text-center p-2 border-top">
                     <h4 id="score-${player.id}">${player.score}</h4>
@@ -501,22 +537,22 @@ function howToEndGame() {
         switch(players[activePlayer].darts) {
             case 3:
                 //console.log('3 sipky')
-                $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h4 class="badge bg-secondary">${bestWayToEndGame(players[activePlayer].score)}</h4>`)
+                $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h6 class="p-2 ">${bestWayToEndGame(players[activePlayer].score)}</h6>`)
                 //console.log(bestWayToEndGame(players[activePlayer].score))
                 break;
             case 2:
                 //console.log('2 sipky')
-                $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h4 class="badge bg-secondary">${bestWayToEndGame2Darts(players[activePlayer].score)}</h4>`)
+                $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h6 class="  ">${bestWayToEndGame2Darts(players[activePlayer].score)}</h6>`)
                 //console.log(bestWayToEndGame2Darts(players[activePlayer].score))
                 break;
             case 1:
                 //console.log('1 sipka')
-                $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h4 class="badge bg-secondary">${bestWayToEndGame1Darts(players[activePlayer].score)}</h4>`)
+                $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h6 class="  ">${bestWayToEndGame1Darts(players[activePlayer].score)}</h6>`)
                 //console.log(bestWayToEndGame1Darts(players[activePlayer].score))
                 break;
             default:
                 //console.log('default sipka')
-                $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h4 class="badge bg-secondary">${bestWayToEndGame(players[activePlayer].score)}</h4>`)
+                $("#"+players[activePlayer].id+" .route-to-endgame").html(`<h6 class="  ">${bestWayToEndGame(players[activePlayer].score)}</h6>`)
                 //console.log(bestWayToEndGame(players[activePlayer].score))
 
                 break;
@@ -746,6 +782,16 @@ function generateRandomString(string_length) {
     }
 }
 
+function multiplierIntoNumber(multiplier) {
+    if (multiplier.includes("T")) {
+       return 3;
+    } else if (multiplier.includes("D")) {
+        return 2;
+    } else {
+        return 1;
+    }
+}
+
 function createToast(isSuccess, toastMessage) {
     var toastContainer = createToastContainer(isSuccess, toastMessage);
     $("#toast-holder").prepend(toastContainer);
@@ -796,6 +842,33 @@ function loadingScreen() {
     }, 1000);
 }
 
+
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement &&    // alternative standard method
+        !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      } else if (document.documentElement.msRequestFullscreen) {
+        document.documentElement.msRequestFullscreen();
+      } else if (document.documentElement.mozRequestFullScreen) {
+        document.documentElement.mozRequestFullScreen();
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
+  }
+  
 
 
  
@@ -1013,6 +1086,3 @@ function loadingScreen() {
     document.body.removeChild(container);
     frame = undefined;
   }
-
- 
-
