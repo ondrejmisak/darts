@@ -11,18 +11,29 @@ var currentScore = 0;
 var orderOfWinners = 1;
 let gameStatus = true;
 
+let canVibrate = false;
+if('vibrate' in navigator)
+  canVibrate = true;
+
+const audio_START = new Audio("assets/audio/PSX.mp3");
+const audio = new Audio("assets/audio/pew-pew.mp3");
+const audio_win = new Audio("assets/audio/bad-to-the-bone.mp3");
+const audio_loss = new Audio("assets/audio/nein.mp3");
 
 
 $( document ).ready(function() {
+   
     $("#loader").fadeIn("slow")
     $("#loader").fadeOut("slow", function() {
         $(this).removeClass("d-flex");
         $("#setMaxScore").fadeIn("slow")
+        
     }); 
 });
 
 /** scene #1 */
 function setMaxScore(score){
+    
     maxScore = score;
     let scoreScreen = $("#setMaxScore");
     scoreScreen.fadeOut().removeClass('d-flex');
@@ -72,7 +83,7 @@ function createPlayer(playersName) {
 
 
 function createGame() {
-
+    audio_START.cloneNode(true).play();
 playersTest = 
     [
         {
@@ -185,6 +196,10 @@ function addScore(element, hit) {
         return false;
     }
 
+    if (canVibrate) 
+    navigator.vibrate(500);
+    audio.cloneNode(true).play();
+
     var totalRoundScore1 = $(".user-round-score-total-"+players[activePlayer].id+":last").html();
     
     if(!totalRoundScore1){
@@ -235,6 +250,7 @@ function addScore(element, hit) {
             .before(`<li class="list-inline-item round-score">0</li>`);
            
         }
+        audio_loss.cloneNode(true).play();
         nextPlayersMove();
         return false;
     }
@@ -275,6 +291,9 @@ function addScore(element, hit) {
 }
 
 function handleUndo() {
+
+    if (canVibrate) 
+    navigator.vibrate(500);
 
 
     var undoMulti = 1;
@@ -451,6 +470,7 @@ function showWinningModal () {
     }
 
     myModal.toggle();
+    audio_win.cloneNode(true).play();
     //todo
     /*const myModalEl = document.getElementById('exampleModal')
         myModalEl.addEventListener('hidden.bs.modal', event => {
@@ -847,6 +867,8 @@ function loadingScreen() {
         });
     }, 1000);
 }
+
+
 
 
 
