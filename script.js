@@ -1114,3 +1114,45 @@ function toggleFullScreen() {
     document.body.removeChild(container);
     frame = undefined;
   }
+
+/* 
+ let inputArray = [];
+
+function addInput() {
+  const input = document.getElementById("input").value;
+  inputArray.push(input);
+  updateDisplay();
+}
+
+function removeInput() {
+  const removeInput = document.getElementById("removeInput").value;
+  const indexToRemove = inputArray.indexOf(removeInput);
+  if (indexToRemove !== -1) {
+    inputArray.splice(indexToRemove, 1);
+    updateDisplay();
+  }
+}
+
+function updateDisplay() {
+  document.getElementById("arrayDisplay").textContent = inputArray.toString();
+  document.getElementById("mostFrequent").textContent = findMostFrequentInput();
+}
+
+function findMostFrequentInput() {
+  if (inputArray.length === 0) return "N/A";
+
+  let frequencyMap = {};
+  let maxFrequency = 0;
+  let mostFrequentInput = inputArray[0];
+
+  for (let input of inputArray) {
+    frequencyMap[input] = (frequencyMap[input] || 0) + 1;
+    if (frequencyMap[input] > maxFrequency) {
+      maxFrequency = frequencyMap[input];
+      mostFrequentInput = input;
+    }
+  }
+
+  return mostFrequentInput;
+}
+*/
