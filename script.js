@@ -2,6 +2,7 @@ let maxScore = 51;
 const randomNames = ["Martin", "Peter", "Ondrej", "Michal", "Lukas", "Jozko", "Andrej", "Matus", "Dominika"];
 let players       = [];
 let playersBackup = [];
+let mostFrequentArray = [];
 let activePlayer  = 0;
 let round         = 1;
 let multiplier    = 1;
@@ -15,7 +16,7 @@ let canVibrate = false;
 if('vibrate' in navigator)
   canVibrate = true;
 
-const audio_START = new Audio("assets/audio/PSX.mp3");
+ 
 const audio = new Audio("assets/audio/pew-pew.mp3");
 const audio_win = new Audio("assets/audio/bad-to-the-bone.mp3");
 const audio_loss = new Audio("assets/audio/nein.mp3");
@@ -83,8 +84,8 @@ function createPlayer(playersName) {
 
 
 function createGame() {
-    audio_START.cloneNode(true).play();
-playersTest = 
+     
+playersTEST = 
     [
         {
             "id": "B2uFPuOB",
@@ -129,6 +130,9 @@ playersTest =
     }  
     
     playersBackup = JSON.parse(JSON.stringify(players));
+
+    MostFrequentCounter()
+
     /*  test*/
     //$("#loader").remove();
     //$("#setMaxScore").remove()
@@ -156,6 +160,8 @@ playersTest =
     $("#"+players[activePlayer].id).addClass("text-bg-primary");
     howToEndGame();
 }
+
+
 
 function setFirstPlayerActive() {
     $("#"+players[activePlayer].id).removeClass("text-bg-primary");
@@ -197,8 +203,9 @@ function addScore(element, hit) {
     }
 
     if (canVibrate) 
-    navigator.vibrate(500);
-    audio.cloneNode(true).play();
+        navigator.vibrate(500);
+
+    //audio.cloneNode(true).play();
 
     var totalRoundScore1 = $(".user-round-score-total-"+players[activePlayer].id+":last").html();
     
@@ -228,8 +235,11 @@ function addScore(element, hit) {
         $(".user-round-score-total-"+players[activePlayer].id+":last").text(totalRoundScore);
     }
 
+    addToFrequentCounter(multiplierIntoLetter(multiplier) + hit)
+
     resetMultiplier();
     
+   
 
     if( (players[activePlayer].score - roundScore  ) < 0 ) {
         /** prehodil */
@@ -258,6 +268,8 @@ function addScore(element, hit) {
     $("#score-"+players[activePlayer].id).text(players[activePlayer].score - roundScore)
     players[activePlayer].score = players[activePlayer].score - roundScore;
 
+
+    
     /* 
         objIndex = players.findIndex((obj => obj.id == playerId));
         console.log(objIndex)
@@ -345,6 +357,7 @@ function handleUndo() {
     }
     /* tu to bolo, ale co tu bolo? */  
      
+    removeFromFrequentCounter(lastShotText)
 
     $("#score-"+players[activePlayer].id).text(players[activePlayer].score)
     $(".user-round-score-total-"+players[activePlayer].id+":last").text(totalRoundScore)
@@ -513,23 +526,26 @@ function createControlPanel() {
 
 function createPlayerCardContainer(player) {
     var card = $(`
-                <div id="${player.id}" class="card " style="display:none">
-                <div class="card-header border-bottom">
-                    <h5 class="card-title text-center ">${player.name}</h5>
-                </div>
-                <div class="card-body text-center d-flex flex-column gap-3 overflow-y-auto">
-                    <div id="user-round-score-${player.id}" class="text-end">
-                        
+                <div id="${player.id}" class="card" style="display:none">
+                    <div class="card-header border-bottom">
+                        <h5 class="card-title text-center ">
+                            ${player.name} 
+                        </h5>
                     </div>
-                    
-                    <span class="route-to-endgame mt-auto text-center badge bg-dark">
-                    
-                    </span>
-                </div>
-                <div class="card-footer text-center p-2 border-top">
-                    <h4 id="score-${player.id}">${player.score}</h4>
-                </div>
-            </div>           
+                    <div class="card-body text-center d-flex flex-column gap-3 overflow-y-auto">
+                        <div id="user-round-score-${player.id}" class="text-end">
+                            
+                        </div>
+                        
+                        <span class="route-to-endgame mt-auto text-center badge bg-dark">
+                        
+                        </span>
+                    </div>
+                    <div class="card-footer text-center p-2 border-top">
+                        <h4 id="score-${player.id}">${player.score}</h4>
+                        <span id="mostFrequent-${player.id}" class="badge rounded-pill bg-dark">-</span>
+                    </div>
+                </div>           
         `);
     return card;
 };
@@ -896,6 +912,69 @@ function toggleFullScreen() {
       }
     }
   }
+
+/**
+ * 
+ * */
+function MostFrequentCounter() {
+    mostFrequentArray = []    
+    players.forEach(player => {
+        var objct = {
+            "id": player['id'],
+            "score": [],
+        }
+        mostFrequentArray.push(objct)
+    });
+}
+
+
+
+function addToFrequentCounter(score) {
+    mostFrequentArray[activePlayer].score.push(score);
+    updateFrenquentCounterDisplay();
+}
+ 
+function removeFromFrequentCounter(remove) {
+    const indexToRemove = mostFrequentArray[activePlayer].score.indexOf(remove.replace(/\s/g, ""));
+    if (indexToRemove !== -1) {
+        mostFrequentArray[activePlayer].score.splice(indexToRemove, 1);
+        updateFrenquentCounterDisplay();
+    }
+}
+
+function updateFrenquentCounterDisplay() {
+    document.getElementById("mostFrequent-"+mostFrequentArray[activePlayer].id).textContent = findMostFrequentInput();
+}
+
+function findMostFrequentInput() {
+    console.log(mostFrequentArray[activePlayer].score)
+    if (mostFrequentArray[activePlayer].score.length === 0) 
+        return "-";
+
+    let frequencyMap = {};
+    let maxFrequency = 0;
+    let mostFrequentInput = mostFrequentArray[activePlayer].score[0];
+
+    for (let i of mostFrequentArray[activePlayer].score) {
+        
+        frequencyMap[i] = (frequencyMap[i] || 0) + 1;
+        if (frequencyMap[i] > maxFrequency) {
+            maxFrequency = frequencyMap[i];
+            mostFrequentInput = i;
+        } 
+        else if (frequencyMap[i] === maxFrequency) {
+            mostFrequentInput = "-";
+        } 
+    }
+    return mostFrequentInput;
+} 
+/**
+ * 
+ */
+
+
+
+
   
 
 
@@ -1114,45 +1193,3 @@ function toggleFullScreen() {
     document.body.removeChild(container);
     frame = undefined;
   }
-
-/* 
- let inputArray = [];
-
-function addInput() {
-  const input = document.getElementById("input").value;
-  inputArray.push(input);
-  updateDisplay();
-}
-
-function removeInput() {
-  const removeInput = document.getElementById("removeInput").value;
-  const indexToRemove = inputArray.indexOf(removeInput);
-  if (indexToRemove !== -1) {
-    inputArray.splice(indexToRemove, 1);
-    updateDisplay();
-  }
-}
-
-function updateDisplay() {
-  document.getElementById("arrayDisplay").textContent = inputArray.toString();
-  document.getElementById("mostFrequent").textContent = findMostFrequentInput();
-}
-
-function findMostFrequentInput() {
-  if (inputArray.length === 0) return "N/A";
-
-  let frequencyMap = {};
-  let maxFrequency = 0;
-  let mostFrequentInput = inputArray[0];
-
-  for (let input of inputArray) {
-    frequencyMap[input] = (frequencyMap[input] || 0) + 1;
-    if (frequencyMap[input] > maxFrequency) {
-      maxFrequency = frequencyMap[input];
-      mostFrequentInput = input;
-    }
-  }
-
-  return mostFrequentInput;
-}
-*/
